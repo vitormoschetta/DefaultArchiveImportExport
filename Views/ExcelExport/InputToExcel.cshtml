@@ -1,0 +1,14 @@
+@model DefaultArchiveImportExport.Models.Product
+
+<h3>Export Excel</h3>
+
+<p>Export excel archive of input form</p>
+
+<form action="ExportInput" method="POST">
+    
+    <input asp-for="Name" class="form-control" placeholder="insert name of product"/>
+    <input asp-for="Price" class="form-control" placeholder="insert price"/>
+
+    <input type="submit" value="Export"/>
+
+</form>
