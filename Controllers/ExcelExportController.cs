@@ -54,7 +54,10 @@ namespace DefaultArchiveImportExport.Controllers
                 worksheet.Cell(currentRow, 1).Value = item.Id;
                 worksheet.Cell(currentRow, 2).Value = item.Name;
                 worksheet.Cell(currentRow, 3).Value = item.Price;                
-            }        
+            }      
+
+			// Auto-ajuste colunas
+            worksheet.Columns().AdjustToContents();
 
             await using var memory = new MemoryStream();
 
