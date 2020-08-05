@@ -1,16 +1,20 @@
-using System.IO;
 using DefaultArchiveImportExport.Models;
 using DefaultArchiveImportExport.Util;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using System.IO.Packaging;
 
 namespace DefaultArchiveImportExport.Controllers
 {
-    public class WordExport : Controller
+    public class WordExportController : Controller
     {
 
         public IActionResult Index() => View();
+
+
+        public IActionResult Create() => View();
 
         [HttpPost]
         public IActionResult Create(Processo modelo)
@@ -105,5 +109,29 @@ namespace DefaultArchiveImportExport.Controllers
                 return File(mem.ToArray(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "ABC.docx");
             }
         }
+
+
+        public IActionResult OpenEdit() => View();
+
+        [HttpPost]
+        public void OpenEdit(Processo modelo)
+        {            
+            var filePath = "Data/Abc.doc";                
+            
+            WordprocessingDocument wordprocessingDocument = WordprocessingDocument.Open(filePath, true);
+
+            Body body = wordprocessingDocument.MainDocumentPart.Document.Body;
+            
+            // Incluir texto:
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text("Novo Texto Adicionado"));
+            
+            // Close the handle explicitly.
+            wordprocessingDocument.Close();            
+        }
+
+
+       
     }
 }

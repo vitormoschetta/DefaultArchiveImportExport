@@ -1,0 +1,44 @@
+@model DefaultArchiveImportExport.Models.Processo
+
+
+<form asp-action="Create" method="POST">
+
+    <input type="hidden" asp-for="Vara" value="(Vara)"/>
+    <input type="hidden" asp-for="Comarca" value="(Comarca)" />
+    <input type="hidden" asp-for="NrProcessoCnj" value="(Nr Processo)"/>
+    <input type="hidden" asp-for="Acao" value="(Tipo de Ação)" />
+    <input type="hidden" asp-for="BancoNome" value="(Nome do Banco)" />
+    <input type="hidden" asp-for="ClienteNome" value="(Nome do Cliente)" />
+
+    <div class="row col-12">
+        <section class="col col-md-10">
+            Valor Total Dívida:
+            <input type="text" value="" asp-for="TotalDivida" class="form-control required" onkeypress="$(this).mask('000.000.000,00', {reverse: true});" />
+        </section>                       
+    </div>
+    <div class="row col-12">
+        <section class="col col-md-10">
+            Valor Entrada:
+            <input type="text" value="" asp-for="ValorEntrada" class="form-control required" onkeypress="$(this).mask('000.000.000,00', {reverse: true});" />
+        </section>                       
+    </div>
+    <div class="row col-12">
+        <section class="col col-md-6">
+            Data Vencimento:
+            <input type="date" asp-for="DataVencimento" class="form-control required"  />
+        </section>              
+        <section class="col col-md-4">
+            Quantidade Parcelas
+            <input type="number" asp-for="NrParcelas" class="form-control required"  />
+        </section>                       
+    </div>
+    <div class="row col-12">
+        <section class="col col-md-10">
+            Valor Parcela:
+            <input type="text" value="" asp-for="ValorParcela" class="form-control required" onkeypress="$(this).mask('000.000.000,00', {reverse: true});" />
+        </section>                       
+    </div>        
+
+    <input type="submit" value="Create" />            
+                                            
+</form>
