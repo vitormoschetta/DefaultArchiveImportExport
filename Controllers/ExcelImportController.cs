@@ -1,15 +1,39 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
+using Dapper;
+using DefaultArchiveImportExport.Data;
 using DefaultArchiveImportExport.Models;
 using DefaultArchiveImportExport.Util;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 
 namespace DefaultArchiveImportExport.Controllers
 {
     public class ExcelImportController : Controller
     {
+        private readonly Contexto _context;
+        private readonly IConfiguration _configuration;
+        private readonly ImportaDados _importaDados;
+
+        public ExcelImportController(Contexto context, IConfiguration configuration, ImportaDados importaDados)
+        {
+            _context = context;    
+            _configuration = configuration;
+            _importaDados = importaDados;
+        }
+
+        // Using Dapper se for preciso
+        public string GetConnection()
+        {
+            var connection = _configuration.GetSection("ConnectionStrings").GetSection("DefaultConnection").Value;
+            return connection;
+        }
+
         public IActionResult Index() => View();
 
         public IActionResult Import()
@@ -41,5 +65,35 @@ namespace DefaultArchiveImportExport.Controllers
                 return View(products);                
             }
         }
+
+
+        
+
+        
+        public IActionResult SignalR() => View();
+
+        [HttpPost]
+        public IActionResult SignalR(IFormFile arquivo)
+        {                        
+            string destino = "C:/uploadweb/";
+
+            if (!Directory.Exists(destino)) Directory.CreateDirectory(destino);
+            
+            var fileName = destino +  System.IO.Path.GetFileName(arquivo.FileName);
+
+            if (System.IO.File.Exists(fileName)) System.IO.File.Delete(fileName);
+            
+            using (var localFile = System.IO.File.OpenWrite(fileName))            
+            using (var uploadedFile = arquivo.OpenReadStream())
+            {
+                uploadedFile.CopyTo(localFile);
+                destino = localFile.Name;              
+            }            
+            
+            _importaDados.Importar(destino);
+
+            return View();
+        }
+      
     }
 }
