@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Packaging;
+using DocumentFormat.OpenXml;
 
 namespace DefaultArchiveImportExport.Controllers
 {
@@ -114,21 +115,49 @@ namespace DefaultArchiveImportExport.Controllers
         public IActionResult OpenEdit() => View();
 
         [HttpPost]
-        public void OpenEdit(Processo modelo)
+        public IActionResult OpenEdit(Processo modelo)
         {            
-            var filePath = "Data/Abc.doc";                
-            
-            WordprocessingDocument wordprocessingDocument = WordprocessingDocument.Open(filePath, true);
+            //string modelo = Path.Combine(@"c:\word\ABC.docx");  
+            var modelFile = FileInputUtil.GetFileInfo("Data",  "ABC.docx").FullName;            
 
-            Body body = wordprocessingDocument.MainDocumentPart.Document.Body;
-            
-            // Incluir texto:
-            Paragraph para = body.AppendChild(new Paragraph());
-            Run run = para.AppendChild(new Run());
-            run.AppendChild(new Text("Novo Texto Adicionado"));
-            
-            // Close the handle explicitly.
-            wordprocessingDocument.Close();            
+            using (MemoryStream memoryRepository = new MemoryStream())  // => Cria um repositório em memória
+            {                
+                using (WordprocessingDocument doc = WordprocessingDocument.Open(modelFile, false))    // => faz a leitura do doc modelo
+                using (WordprocessingDocument newDoc = WordprocessingDocument.Create(memoryRepository, WordprocessingDocumentType.Document))  // => instancia um novo docx no repositório em memória
+                {
+                    foreach (var part in doc.Parts)
+                        newDoc.AddPart(part.OpenXmlPart, part.RelationshipId);   // => copia o texto do docx modelo para o novo docx em memória
+
+                    var document = newDoc.MainDocumentPart.Document; //  =>  Separa o texto do novo docx em partes para a leitura
+
+                    foreach (var text in document.Descendants<Text>()) 
+                    {                                                          
+                        if (text.Text.Contains("101"))               //  =>  Nesse bloco são identificados os caracteres e substituídos caso existam no texto                  
+                            text.Text = text.Text.Replace("101", modelo.Vara);                            
+                        if (text.Text.Contains("102"))                            
+                            text.Text = text.Text.Replace("102", modelo.Comarca);  
+                        if (text.Text.Contains("103"))                            
+                            text.Text = text.Text.Replace("103", modelo.NrProcessoCnj);                            
+                        if (text.Text.Contains("104"))                            
+                            text.Text = text.Text.Replace("104", modelo.BancoNome);                              
+                        if (text.Text.Contains("105"))                            
+                            text.Text = text.Text.Replace("105", modelo.Acao);                            
+                        if (text.Text.Contains("106"))                            
+                            text.Text = text.Text.Replace("106", modelo.ClienteNome);  
+                        if (text.Text.Contains("107"))                            
+                            text.Text = text.Text.Replace("107", modelo.TotalDivida.ToString("C")  + "(" + ConverteParaExtenso.ValorParaExtenso2(modelo.TotalDivida) + ")");                         
+                        if (text.Text.Contains("108"))                            
+                            text.Text = text.Text.Replace("108", modelo.ValorEntrada.ToString("C") + "(" + ConverteParaExtenso.ValorParaExtenso2(modelo.ValorEntrada) + ")");  
+                        if (text.Text.Contains("109"))                            
+                            text.Text = text.Text.Replace("109", modelo.DataVencimento.ToString("dd/MM/yyyy"));                            
+                        if (text.Text.Contains("110"))                            
+                            text.Text = text.Text.Replace("110", modelo.NrParcelas.ToString() +  "(" + ConverteParaExtenso.NumeroParaExtenso(modelo.NrParcelas) + ")");  
+                        if (text.Text.Contains("111"))                            
+                            text.Text = text.Text.Replace("111", modelo.ValorParcela.ToString("C") + "(" + ConverteParaExtenso.ValorParaExtenso2(modelo.ValorParcela) + ")");                 
+                    } 
+                }
+                return File(memoryRepository.ToArray(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Documento.docx");  // => Faz o dowload do docx em memória                
+            }       
         }
 
 
